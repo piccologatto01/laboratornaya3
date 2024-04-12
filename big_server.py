@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 import datetime
 import struct
-
+import shutil
 
 def read_from_json():
     if os.path.exists("programs.json"):
@@ -96,6 +96,12 @@ class Server:
         elif input_data == "1":
             print("nastya")
             res = await self.nastya(reader)
+        elif input_data == "3":
+            print("sasha")
+            res = await self.sasha(reader)
+        elif input_data == "4":
+            print("lera")
+            res = await self.lera(reader)
         if res:
             writer.write(res.encode('utf-8'))
             writer.close()
@@ -215,6 +221,34 @@ class Server:
                              json.dump(serialized_tree, json_file, indent=4)
                          counter += 1
 
+def compare_folders(folder1, folder2):
+    '''
+    Данная функция сопоставляет/сравнивает
+    наполнение папок
+    :param folder1: первая папка
+    :param folder2: вторая папка
+    :return: измененные файлы/отсутствие изменений
+    '''
+    files1 = os.listdir(folder1) #возвращает список имен файлов в каталоге
+    files2 = os.listdir(folder2)
+
+    # Проверяем содержимое папок
+    if set(files1) == set(files2):
+        #(set(files1), set(files2))
+        print("Содержимое папок совпадает")
+    else:
+        print("Содержимое папок не совпадает")
+        # Добавляем недостающие файлы
+        missing_files = set(files1) - set(files2)
+        for file in missing_files:
+            shutil.copy(os.path.join(folder1, file), folder2)
+            print(f"Добавлен файл: {file}")
+
+        # Удаляем лишние файлы
+        extra_files = set(files2) - set(files1)
+        for file in extra_files:
+            os.remove(os.path.join(folder2, file))
+            print(f"Удален файл: {file}")
 
     async def _async_start(self):
             self.server = await asyncio.start_server(
@@ -224,6 +258,47 @@ class Server:
             print(f'Сервер запущен на {addr}')
             async with self.server:
                 await self.server.serve_forever()
+
+async def sasha(self, reader):
+    program = compare_folders(folder1, folder2)
+    checktime = input('Введите количество повторений')
+    for i in range(checktime):
+        while True:
+        compare_folders(folder1, folder2)
+        time.sleep(10)
+
+def get_programs_in_path(path):
+    programs = []
+    for dirpath, dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            programs.append(os.path.join(dirpath, filename))
+    return programs
+
+def get_system_path_programs():
+    system_path = os.getenv('PATH')
+    system_path_list = system_path.split(os.pathsep)
+    programs = []
+    for path in system_path_list:
+        programs.extend(get_programs_in_path(path))
+    return programs
+
+
+async def lera(self, reader):
+    programs = get_system_path_programs()
+
+    data = {}
+    for program in programs:
+        folder, program_name = os.path.split(program)
+        folder_data = data
+        for subfolder in folder.split(os.sep):
+            folder_data = folder_data.setdefault(subfolder, {})
+        folder_data[program_name] = None
+
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
+
+
+
 
 if __name__ == "__main__":
         HOST = socket.gethostname()
